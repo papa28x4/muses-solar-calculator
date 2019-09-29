@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    $('#email').on('focus',function(){
+    $('#name').on('focus',function(){
            
             $(this).animate({
                 "width" : "320px"
@@ -8,8 +8,8 @@ $(document).ready(function(){
                 "left": "+=50"
             }, 500)
     })
-    $('#email').on('blur',function(){
-            
+    $('#name').on('blur',function(){
+            console.log($(this))
             $(this).animate({
                 "width" : "270px"
             }, 500)
@@ -22,7 +22,7 @@ $(document).ready(function(){
     let count = 2; 
     let total = 0;
     let report, details, residence, sunHours, panels, hourlyEnergyRequired, product;
-    
+    // parseFloat($(this).val()).toFixed(2)
     
     let obj = []
 
@@ -50,8 +50,8 @@ $(document).ready(function(){
                 <input id="qty-${count}" class="qty" value="1" min="0" max="999" type="number">
                 <input id="rating-${count}" value=0 class="watts" type=text disabled/>
                 <input id="hours-${count}" class="hours" min="0" max="24" step="1" value="0" type="number">
-                <input id="daily-${count}" class="daily" value="0" type=text>
-                <button class="remove-row">Remove</button></div>`
+                <input  id="daily-${count}" class="daily" value="0">
+                <button class="remove-row">X</button></div>`;
        
                 $('#entries').append(newRow)
                 // let element =  $('.appliances')
@@ -59,7 +59,7 @@ $(document).ready(function(){
             }
 
     const populateList =(array, element) =>{
-        
+        // let select = element || $('.appliances')
         element.select2({
         data: Object.keys(array)
      })
@@ -73,6 +73,7 @@ $(document).ready(function(){
         switch(true){
             case hourlyEnergyRequired < 1000:
                     offer = "Muses 1kw Flexible Monocrystalline Solar Panels";
+                    console.log('I am here 1')
                     break;
             case hourlyEnergyRequired < 5000:
                     offer = "Muses 2-5kw Foldable Solar Panels"
@@ -90,11 +91,13 @@ $(document).ready(function(){
     }
     
     $('#worksheet').on('change', '.appliances', function(){
-    
-       let sequence = this.id.split('-')[1]   
+        //  console.log($(this).val())
+        //  console.log(this.id)
+         let sequence = this.id.split('-')[1]
+       
        let index = Object.keys(ratings).indexOf($(this).val());
        if(index >= 0){console.log(Object.values(ratings)[index])
-        
+        console.log(`#rating-${sequence}`)
             $(`#rating-${sequence}`).val(Object.values(ratings)[index])
         }else{
             $(`#rating-${sequence}`).val(0)
@@ -105,13 +108,15 @@ $(document).ready(function(){
      $('#worksheet').on('change', 'input, select', function(){
         
          let sequence = this.id.split('-')[1]
+        // console.log(parseFloat($(`#qty-${sequence}`).val()), parseFloat($(`#rating-${sequence}`).val()),  $(`#hours-${sequence}`).val() )
+    
            let perdevice= $(`#qty-${sequence}`).val() * $(`#rating-${sequence}`).val() * $(`#hours-${sequence}`).val() 
            parseFloat($(`#daily-${sequence}`).val(perdevice)).toFixed(2)
-        
+        // parseFloat($('.hours').val()).toFixed(2)
      })
 
      $('#sunhours').on('change', function(){
-        
+        // console.log(sunhours.value)
        residence = sunhours.value
        let index = Object.keys(states).indexOf(residence);
        if(index >= 0){console.log(Object.values(states)[index])
@@ -121,7 +126,7 @@ $(document).ready(function(){
      })
 
      $('#add-Row').on('click', function(){
-        
+        console.log('here')
          createRow(ratings)
      })
 
@@ -130,177 +135,258 @@ $(document).ready(function(){
             $(this).closest('div').remove()
      })
 
-     $('#calc-02').on('click', function(){
-         
-       if(residence !== undefined){
-             
-        $('.appliances').each(function(index, value){
-            obj[index] = {};
-            obj[index].appliances = ($(this).val())
-        })
-
-        $('.qty').each(function(index, value){
-            obj[index].quantity = ($(this).val())
-        })
-
-        $('.watts').each(function(index, value){
-            obj[index].rating = ($(this).val())
-        })
-
-        $('.hours').each(function(index, value){
-            obj[index].hours = ($(this).val())
-        })
-
-        $('.daily').each(function(index, value){
-            obj[index].consumptionPerDevice = ($(this).val())
-            total += +($(this).val())
-            hourlyEnergyRequired = (total / sunHours).toFixed(2)
-            panels = Math.ceil(hourlyEnergyRequired / 320)
-            
-        })
-        product = recommendProduct(hourlyEnergyRequired)
-        details = `Dear <b>${email}</b>,
-              Your daily energy need is <strong>${total}</strong> wattshr. The average sun-hours in <b>${residence}</b> is <b>${sunHours}</b>hours. Hence, you will need <b>${panels}</b> solar panel(s) to provide an average of <b>${hourlyEnergyRequired}</b> watts per sun-hour. Armed with this information, we would like to recommend our <b>${product}</b>.`
     
-              $('#analysis').html(details)
-              createDataArrays()
-              $('#power-needed').html('<button id="viewChart" type="button">Click To View Chart</button>')
-       }else{
-            $('#guide').html('<p style="color:red; font-weight:bold; font-size:1.5em;">Please enter your location</p>')
-       }
-     })
+    document.querySelectorAll( '.showResult' ).forEach( ( elem ) => {
+        elem.addEventListener("click", function() {
+          if (residence !== undefined) {
+            $(".appliances").each(function(index, value) {
+              obj[index] = {};
+              obj[index].appliances = $(this).val();
+            });
+
+            $(".qty").each(function(index, value) {
+              obj[index].quantity = $(this).val();
+            });
+
+            $(".watts").each(function(index, value) {
+              obj[index].rating = $(this).val();
+            });
+
+            $(".hours").each(function(index, value) {
+              obj[index].hours = $(this).val();
+            });
+
+            $(".daily").each(function(index, value) {
+              obj[index].consumptionPerDevice = $(this).val();
+              console.log(obj);
+              console.log($(this));
+              total += +$(this).val();
+              hourlyEnergyRequired = (total / sunHours).toFixed(2);
+              panels = Math.ceil(hourlyEnergyRequired / 320);
+              console.log(total);
+            });
+            product = recommendProduct(hourlyEnergyRequired);
+            details = `Dear <b>${name}</b>,
+              Your daily energy need is <strong>${total}</strong> wattshr. The average sun-hours in <b>${residence}</b> is <b>${sunHours}</b>hours. Hence, you will need <b>${panels}</b> solar panel(s) to provide an average of <b>${hourlyEnergyRequired}</b> watts per sun-hour. Armed with this information, we would like to recommend our <b>${product}</b>.`;
+
+            $("#analysis").html(details);
+            createDataArrays();
+            $("#power-needed").html(
+              '<button style="padding: 0.5rem 1rem; background: orange; border-radius: 20px; outline: none;"id="viewChart" type="button">Click To View Chart</button>'
+            );
+          } else {
+            console.log("fill");
+            $("#guide").html(
+              '<p style="color:red; font-weight:bold; font-size:1.5em;">Please enter your location</p>'
+              );
+              setTimeout(() => {
+                  $("#guide").html(
+                    '<p style="font-weight: bold" id="guide"><span style="color:red; font-size:1.5em;">*</span>Select your state of residence</p>'
+                  );
+              }, 3000);
+          }
+        });
+    })
+
+
+    
 
      let isOpen = false;
 
-     $('#power-needed').on('click', '#viewChart', function(){
-        
-        let showChart= `<div id="breakdown">
+     $("#power-needed").on("click", "#viewChart", function() {
+       let showChart = `<div id="breakdown">
                 <canvas id="myChart_P"></canvas>
      
                 </div>
                 <div id="sunhoursByState">
                 <canvas id="myChart_S"></canvas>
+                </div>`;
+       // $('#analysis').css({position: 'relative'});
+       if (!isOpen) {
+         $("#viewChart").text("Click To Close");
+         $("#analysis").css({ position: "absolute", left: 447 });
+         $("#analysis").animate(
+           {
+             top: "+=270"
+           },
+           2000
+         );
+         $("#charts").hide();
+         setTimeout(() => {
+           $("#charts").show();
+           $("#charts").html(showChart);
+           createCharts(
+             "myChart_P",
+             "pie",
+             dataEntry_appliances,
+             dataEntry_powerConsumption,
+             "Your Power Consumption by Appliance"
+           );
+           createCharts(
+             "myChart_S",
+             "bar",
+             dataEntry_states,
+             dataEntry_sunhours,
+             "Sun Hours by State"
+           );
+         }, 1500);
+         isOpen = true;
+       } else {
+         $("#charts").hide();
+         $("#analysis").animate(
+           {
+             top: "-=270"
+           },
+           2000
+         );
+         $("#viewChart").text("Click To View Chart");
+         isOpen = false;
+       }
+     });
 
-                </div>`
-        // $('#analysis').css({position: 'relative'});
-        if(!isOpen){
-            $('#viewChart').text('Click To Close')
-            $('#analysis').css({position: 'absolute', left: 447});
-            $('#analysis').animate({
-                "top": "+=270"
-            }, 2000)
-            $('#charts').hide()
-            setTimeout(()=>{
-                $('#charts').show()
-                $('#charts').html(showChart)
-                createCharts('myChart_P','pie',dataEntry_appliances,dataEntry_powerConsumption, 'Your Power Consumption by Appliance' );
-                createCharts('myChart_S','bar',dataEntry_states,dataEntry_sunhours, 'Sun Hours by State' );
-            }, 1500)
-            isOpen = true;
-        }else{
-             $('#charts').hide()
-             $('#analysis').animate({
-                "top": "-=270"
-             }, 2000)
-             $('#viewChart').text('Click To View Chart')
-             isOpen = false;
-        }
-      
-    })
-
-     
-
-     
     let dataEntry_appliances, dataEntry_powerConsumption, dataEntry_states, dataEntry_sunhours;
-        
-    const createDataArrays = () =>{
-         dataEntry_appliances = [];
-         dataEntry_powerConsumption = [];
-         dataEntry_states = [];
-         dataEntry_sunhours = [];
-        for (let i=0; i<obj.length; i++){
-            if(obj[i].consumptionPerDevice != 0){
-                dataEntry_appliances.push(obj[i].appliances)
-                dataEntry_powerConsumption.push(obj[i].consumptionPerDevice)
+
+    const createDataArrays = () => {
+        dataEntry_appliances = [];
+        dataEntry_powerConsumption = [];
+        dataEntry_states = [];
+        dataEntry_sunhours = [];
+        for ( let i = 0; i < obj.length; i++ ) {
+            if ( obj[ i ].consumptionPerDevice != 0 ) {
+                dataEntry_appliances.push( obj[ i ].appliances )
+                dataEntry_powerConsumption.push( obj[ i ].consumptionPerDevice )
             }
-           
         }
 
-        for(key in states){
-            dataEntry_states.push(key)
-            dataEntry_sunhours.push(states[key])
+        for (let  key in states ) {
+            dataEntry_states.push( key )
+            dataEntry_sunhours.push( states[ key ] )
         }
-        
-        
+
     }
-      
 
-        let email = JSON.parse(localStorage.getItem('userData'))|| '';
+        // createCharts('myChart_P','bar',dataEntry_appliances,dataEntry_powerConsumption, 'Your Power Consumption by Appliance' )
+        // createCharts('myChart_S','line',dataEntry_states,dataEntry_sunhours, 'Sun Hours by State' )
+
+        let name = JSON.parse(localStorage.getItem('userData'))|| '';
         $('.loading').on('click', function(){
             
-            email = $('#email').val()
-            if(email){
-                localStorage.setItem('userData', JSON.stringify(email))
-                window.location.href = "index2.html"
+            name = $('#name').val()
+            if(name){
+                localStorage.setItem('userData', JSON.stringify(name))
+                console.log(name)
+                window.location.href = "calculate.html"
             }else{
-                $('#email').addClass('error')
-                $('#errorMessage').html("<span class='errMessage' style='color: red;'>Please Enter Your Email<span>")
+                $('#name').addClass('error')
+                $('#errorMessage').html("<span class='errMessage' style='color: red;'>Please Enter Your Name :)<span>")
                  
             }
     })
 
     $('#reset').on('click', function(){
-        
+
+        console.log($('#analysis'))
         $("input[type=text], input[type=number]").val("0");
         $('#analysis').html('');
-        $('#analysis').css({position: 'static'});
-        $('#charts').html('')
-        $('#charts').hide()
-        $('#power-needed').html('TOTAL POWER NEEDED')
+        $('#appliance-0').val($('#appliance-0').prop('selected'));
+        $('select').val('');
+
         
+        $("#analysis").css({ position: "static" });
+        $("#charts").html("");
+        $("#charts").hide();
+        $("#power-needed").html("TOTAL POWER NEEDED");
+
+        const entries = document.querySelectorAll( '.entry' )
+        entries.forEach( ( entry ) => {
+            if((entry.getAttribute('id') === 'entry-0') || (entry.getAttribute('id') === 'entry-1') || (entry.getAttribute('id') === 'entry-2') ) {
+                entry.style.display = "flex";
+            } else {
+                entry.style.display = "none";
+            }
+            console.log(entry.getAttribute('id'))
+        })
+    
     })
 
-    let colors = [
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)',
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)',
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)',
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)',
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)',
-        'rgba(255, 99, 132, 0.4)', 'rgba(54, 162, 235, 0.4)', 'rgba(255, 206, 86, 0.4)',  'rgba(75, 192, 192, 0.4)', 'rgba(153, 102, 255, 0.4)', 'rgba(255, 159, 64, 0.4)'
-    ];
+
+     let colors = [
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)",
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)",
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)",
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)",
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)",
+       "rgba(255, 99, 132, 0.4)",
+       "rgba(54, 162, 235, 0.4)",
+       "rgba(255, 206, 86, 0.4)",
+       "rgba(75, 192, 192, 0.4)",
+       "rgba(153, 102, 255, 0.4)",
+       "rgba(255, 159, 64, 0.4)"
+     ];
 
 function createCharts(element, choice, xArray, yArray, title){
     var ctx = document.getElementById(element).getContext('2d');
-   
+    console.log(choice, xArray, yArray)
         var myChart = new Chart(ctx, {
+          type: choice,
         type: choice, 
-        data: {
-            labels: xArray, 
-            datasets: [{
+          type: choice,
+          data: {
+            labels: xArray,
+            datasets: [
+              {
                 label: title,
-                data: yArray, 
+                data: yArray,
                 backgroundColor: colors,
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                  "rgba(255, 159, 64, 1)"
                 ],
                 borderWidth: 1
-            }]
-        },
-        options: {
+              }
+            ]
+          },
+          options: {
             scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
+              yAxes: [
+                {
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }
+              ]
             }
-        }
-    });
+          }
+        });
 }
 
 
