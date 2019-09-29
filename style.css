@@ -118,10 +118,10 @@ button:hover{
        margin-right: 10px;
 }
 
-.link-border:hover {
+/* .link-border:hover {
     border: 2px solid orange;
     border-radius: 2em;
-} 
+}  */
 
 .nav-links li:nth-child(2){
     animation-delay: 0.5s;    
